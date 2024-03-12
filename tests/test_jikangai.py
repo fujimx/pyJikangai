@@ -1,17 +1,44 @@
-# the inclusion of the tests module is not meant to offer best practices for
-# testing in general, but rather to support the `find_packages` example in
-# setup.py that excludes installing the "tests" package
-
 import unittest
+from datetime import datetime, timedelta
+from jikangai import BreakTime, LegalHoliday
 
-from jikangai.jikangai import add_one
+
+class TestLegalHoliday(unittest.TestCase):
+
+    def test_initialization(self):
+        holiday = LegalHoliday(2, 3)
+        self.assertEqual(holiday.week_number_of_4weeks, 2)
+        self.assertEqual(holiday.weekday, 3)
+
+    def test_of_every_sunday(self):
+        holidays = LegalHoliday.of_every_sunday()
+        self.assertEqual(len(holidays), 4)
+        for i, holiday in enumerate(holidays, start=1):
+            self.assertEqual(holiday.week_number_of_4weeks, i)
+            self.assertEqual(holiday.weekday, 7)
 
 
-class TestSimple(unittest.TestCase):
+class TestBreakTime(unittest.TestCase):
 
-    def test_add_one(self):
-        self.assertEqual(add_one(5), 6)
+    def test_initialization(self):
+        start = datetime(2024, 3, 17, 9, 0)
+        end = datetime(2024, 3, 17, 9, 30)
+        break_time = BreakTime(start, end)
+        self.assertEqual(break_time.start, start)
+        self.assertEqual(break_time.end, end)
 
+    def test_value_method(self):
+        start = datetime(2024, 3, 17, 9, 0)
+        end = datetime(2024, 3, 17, 9, 30)
+        break_time = BreakTime(start, end)
+        expected_value = timedelta(minutes=30)
+        self.assertEqual(break_time.value(), expected_value)
+
+    def test_invalid_initialization(self):
+        start = datetime(2024, 3, 17, 9, 30)
+        end = datetime(2024, 3, 17, 9, 0)
+        with self.assertRaises(ValueError):
+            BreakTime(start, end)
 
 if __name__ == '__main__':
     unittest.main()
